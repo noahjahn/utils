@@ -1,0 +1,57 @@
+#!/bin/sh
+
+HOST=
+PORT='3306'
+USERNAME=
+PASSWORD=
+DATABASE=
+FILE=
+MYSQL_VERSION='8'
+
+print_usage() {
+  printf "Usage:\tmysql-import\n\t\t-h <host>\n\t\t-P <port>\n\t\t-u <username>\n\t\t-p <password>\n\t\t-d <database-name>\n\t\t-f <file-name>\n\t\t-v <mysql-server-version>\n\n"
+  printf "\t-P\tport is optional, defaults to 3306\n"
+  printf "\t-v\tmysql-server-version is optional, defaults to 8\n"
+}
+
+while getopts 'h:P:u:p:d:f:v:' flag; do
+  case "${flag}" in
+    h) HOST="${OPTARG}" ;;
+    P) PORT="${OPTARG}" ;;
+    u) USERNAME="${OPTARG}" ;;
+    p) PASSWORD="${OPTARG}" ;;
+    d) DATABASE="${OPTARG}" ;;
+    f) FILE="${OPTARG}" ;;
+    v) MYSQL_VERSION="${OPTARG}" ;;
+  esac
+done
+
+if [ -z "$HOST" ]; then
+  print_usage
+  exit 2;
+fi
+
+if [ -z "$USERNAME" ]; then
+  print_usage
+  exit 2;
+fi
+
+if [ -z "$PASSWORD" ]; then
+  print_usage
+  exit 2;
+fi
+
+if [ -z "$DATABASE" ]; then
+  print_usage
+  exit 2;
+fi
+
+CONTAINER_NAME=noahjahn-utils-mysql-import-mysql
+
+docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d mysql:$MYSQL_VERSION -f /dev/null
+
+docker cp $FILE $CONTAINER_NAME:/$FILE
+
+docker exec -i $CONTAINER_NAME mysql --host $HOST --port $PORT --user $USERNAME -p$PASSWORD $DATABASE < $FILE
+
+docker stop $CONTAINER_NAME
