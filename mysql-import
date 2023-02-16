@@ -56,4 +56,4 @@ docker exec -i $CONTAINER_NAME mysql --host $HOST --port $PORT --user $USERNAME 
 docker exec -i $CONTAINER_NAME mysql --host $HOST --port $PORT --user $USERNAME -p$PASSWORD $DATABASE < $FILE
 docker exec -i $CONTAINER_NAME mysql --host $HOST --port $PORT --user $USERNAME -p$PASSWORD -e 'SET FOREIGN_KEY_CHECKS=1;'
 
-docker stop $CONTAINER_NAME
+docker stop -t 1 $CONTAINER_NAME
