@@ -52,6 +52,8 @@ docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d mysql:$MYSQL_VERSION
 
 docker cp $FILE $CONTAINER_NAME:/$FILE
 
+docker exec -i $CONTAINER_NAME mysql --host $HOST --port $PORT --user $USERNAME -p$PASSWORD -e 'SET FOREIGN_KEY_CHECKS=0;'
 docker exec -i $CONTAINER_NAME mysql --host $HOST --port $PORT --user $USERNAME -p$PASSWORD $DATABASE < $FILE
+docker exec -i $CONTAINER_NAME mysql --host $HOST --port $PORT --user $USERNAME -p$PASSWORD -e 'SET FOREIGN_KEY_CHECKS=1;'
 
 docker stop $CONTAINER_NAME
