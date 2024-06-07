@@ -8,13 +8,15 @@ REMOTE_HOST=
 REMOTE_PORT=
 
 print_usage() {
-    printf "Usage:\ttunnel\n"
-    printf "\t\t-u <bastion-username>\t The username of the server you have SSH access to\n"
-    printf "\t\t-h <bastion-host>\t The host of the server you have SSH access to\n"
-    printf "\t\t-k <bastion-private-key> The private key file path for the user of the server you have SSH access to\n"
-    printf "\t\t-p <local-port>\t\t The port on your computer that you want to use to access the remote resource through\n"
-    printf "\t\t-r <remote-host>\t The host of the resource that is accessible from within the network of the bastion server\n"
-    printf "\t\t-P <remote-port>\t The port of the resource that is accessible from within the network of the bastion server\n\n"
+    printf "Usage:\ttunnel [OPTIONS]\n"
+    printf "\nCreate an SSH tunnel quickly and efficiently\n\n"
+    printf "Options:\n"
+    printf "  -u, --bastion-username string\t\tThe username of the server you have SSH access to\n"
+    printf "  -h, --bastion-host string\t\tThe host of the server you have SSH access to\n"
+    printf "  -k, --bastion-private-key string\tThe private key file path for the user of the server you have SSH access to\n"
+    printf "  -p, --local-port int\t\t\tThe port on your computer that you want to use to access the remote resource through\n"
+    printf "  -r, --remote-host string\t\tThe host of the resource that is accessible from within the network of the bastion server\n"
+    printf "  -P, --remote-port int\t\t\tThe port of the resource that is accessible from within the network of the bastion server\n\n"
 }
 
 while true; do
