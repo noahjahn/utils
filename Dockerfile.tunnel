@@ -1,0 +1,11 @@
+FROM alpine
+
+RUN apk add openssh
+
+ENV BASTION_USERNAME=
+ENV BASTION_HOST=
+ENV LOCAL_PORT_MAP=
+ENV REMOTE_HOST=
+ENV REMOTE_PORT=
+
+CMD ssh -o StrictHostKeyChecking=no -g -N -i ./bastion-private-key -L 0.0.0.0:${LOCAL_PORT_MAP}:${REMOTE_HOST}:${REMOTE_PORT} ${BASTION_USERNAME}@${BASTION_HOST}
