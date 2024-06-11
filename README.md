@@ -17,6 +17,8 @@ Utilities I use on a daily basis, dockerized.
     - .bash_profile
     - .bashrc
     - .profile
+    - .zshrc
+    - .zprofile
 
 * be sure to change the file path if you didn't clone this repo to your home directory
 
