@@ -1,0 +1,3 @@
+[submodule "bagels"]
+	path = src/bagels
+	url = git@github.com:noahjahn/bagels.git
