@@ -2,3 +2,7 @@
     path = src/bagels
     url = git@github.com:noahjahn/bagels.git
     branch = main
+[submodule "posting"]
+    path = src/posting
+    url = git@github.com:noahjahn/posting.git
+    branch = main

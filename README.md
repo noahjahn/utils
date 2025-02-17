@@ -8,6 +8,7 @@ Utilities I use on a daily basis, dockerized.
 - [Docker](https://docs.docker.com/get-docker/)
 - Any submodule dependencies
   - [Bagels Requirements](https://github.com/noahjahn/bagels?tab=readme-ov-file#requirements)
+  - [Posting Requirements](https://github.com/noahjahn/posting?tab=readme-ov-file#requirements)
 
 ## Setup
 
@@ -17,13 +18,7 @@ Utilities I use on a daily basis, dockerized.
 git clone git@github.com:noahjahn/utils.git ~/utils
 ```
 
-2. Pull submodules
-
-```shell
-git submodule update --init --recursive --remote
-```
-
-3. Add the directory to your users' `PATH`
+2. Add the directory to your users' `PATH`
 
 - The file is different depending on your OS. Examples:
 
@@ -41,12 +36,12 @@ if [ -d "$HOME/utils" ] ; then
 fi
 ```
 
-4. Launch a new shell, or source the shell config file from the previous step, and you can now use the `utils` on your terminal!
+3. Launch a new shell, or source the shell config file from the previous step, and you can now use the `utils` on your terminal!
 
-Example:
+4. Pull submodules
 
-```
-adminer
+```shell
+utils update
 ```
 
 ## Updating
