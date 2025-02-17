@@ -48,3 +48,11 @@ Example:
 ```
 adminer
 ```
+
+## Updating
+
+Run `utils update`
+
+```shell
+utils update
+```
