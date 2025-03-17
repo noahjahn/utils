@@ -1,0 +1,78 @@
+#!/bin/sh
+
+HOST=
+PORT='5432'
+USERNAME=
+DATABASE=
+PSQL_VERSION='latest'
+
+print_usage() {
+    printf "Usage:\tpsql-export [OPTIONS]\n"
+    printf "\nExport a dump of a PostgreSQL database quickly and efficiently\n\n"
+    printf "Options:\n"
+    printf "  -h, --host string\t\tThe host of the database server you want to export from\n"
+    printf "  -p, --port int\t\tThe port of the database server you want to export from, defaults to 5432\n"
+    printf "  -u, --username string\t\tThe username of the database server that has access to the database that you want to export from\n"
+    printf "  -d, --database string\t\tThe database name on the database server that you want to export from\n"
+    printf "  -v, --version string\t\tThe PostgreSQL database version that you want to use for the pg_dump client, corresponds to the postgres docker image tag, defaults to latest\n"
+}
+
+while true; do
+    case "$1" in
+        -h | --host ) HOST="$2"; shift 2 ;;
+        -p | --port ) PORT="$2"; shift 2 ;;
+        -u | --username ) USERNAME="$2"; shift 2 ;;
+        -d | --database ) DATABASE="$2"; shift 2 ;;
+        -v | --version ) PSQL_VERSION="$2"; shift 2 ;;
+        -- ) shift; break ;;
+        * ) break ;;
+    esac
+done
+
+if [ -z "$HOST" ]; then
+    print_usage
+    exit 2;
+fi
+
+if [ -z "$USERNAME" ]; then
+    print_usage
+    exit 2;
+fi
+
+if [ -z "$DATABASE" ]; then
+    print_usage
+    exit 2;
+fi
+
+IMAGE_TAG="noahjahn-utils-psql-export"
+CONTAINER_NAME="$IMAGE_TAG-$(date +%s)"
+
+docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d postgres:$PSQL_VERSION  -f /dev/null
+
+docker exec -it $CONTAINER_NAME pg_dump \
+    --file /$DATABASE.sql \
+    --host $HOST \
+    --port $PORT \
+    --user $USERNAME \
+    --format=c \
+    --large-objects \
+    --section=pre-data \
+    --section=data \
+    --section=post-data \
+    --no-owner \
+    --no-privileges \
+    --no-tablespaces \
+    --no-unlogged-table-data \
+    --no-comments \
+    --no-publications \
+    --no-subscriptions \
+    --no-security-labels \
+    --no-toast-compression \
+    --no-table-access-method \
+    --verbose \
+    $DATABASE \
+    -W
+
+docker cp $CONTAINER_NAME:/$DATABASE.sql $DATABASE.sql
+
+docker stop -t 1 $CONTAINER_NAME
