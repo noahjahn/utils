@@ -67,13 +67,11 @@ CONTAINER_NAME="$IMAGE_TAG-$(date +%s)"
 
 docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d postgres:$PSQL_VERSION -f /dev/null
 
-docker exec -it $CONTAINER_NAME pg_dump \
-    --file /$DATABASE.sql \
+PG_DUMP_FLAGS="--file /$DATABASE.sql \
     --host $HOST \
     --port $PORT \
     --user $USERNAME \
     --format=c \
-    --large-objects \
     --section=pre-data \
     --section=data \
     --section=post-data \
@@ -86,8 +84,17 @@ docker exec -it $CONTAINER_NAME pg_dump \
     --no-subscriptions \
     --no-security-labels \
     --no-toast-compression \
-    --no-table-access-method \
-    --verbose \
+    --verbose"
+
+if [ "$(echo "$PSQL_VERSION>=16" | bc -l)" -eq "1" ]; then
+    PG_DUMP_FLAGS="$PG_DUMP_FLAGS \
+        --large-objects \
+        --no-table-access-method \
+    "
+fi
+
+docker exec -it $CONTAINER_NAME pg_dump \
+    $PG_DUMP_FLAGS \
     $DATABASE \
     -W
 
