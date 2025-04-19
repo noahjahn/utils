@@ -1,8 +1,8 @@
 [submodule "bagels"]
-    path = src/bagels
-    url = git@github.com:noahjahn/bagels.git
-    branch = main
+path = src/bagels
+url = git@github.com:noahjahn/bagels.git
+branch = main
 [submodule "posting"]
-    path = src/posting
-    url = git@github.com:noahjahn/posting.git
-    branch = main
+path = src/posting
+url = git@github.com:noahjahn/posting.git
+branch = main

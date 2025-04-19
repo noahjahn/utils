@@ -16,10 +16,22 @@ update() {
 
 while true; do
     case "$1" in
-        update ) update; break ;;
-        help) print_usage; exit 0 ;;
-        -- ) shift; break ;;
-        * ) print_usage; break ;;
+    update)
+        update
+        break
+        ;;
+    help)
+        print_usage
+        exit 0
+        ;;
+    --)
+        shift
+        break
+        ;;
+    *)
+        print_usage
+        break
+        ;;
     esac
 done
 

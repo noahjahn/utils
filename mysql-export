@@ -17,34 +17,34 @@ print_usage() {
 
 while getopts 'h:P:u:p:d:v:c:' flag; do
   case "${flag}" in
-    h) HOST="${OPTARG}" ;;
-    P) PORT="${OPTARG}" ;;
-    u) USERNAME="${OPTARG}" ;;
-    p) PASSWORD="${OPTARG}" ;;
-    d) DATABASE="${OPTARG}" ;;
-    v) MYSQL_VERSION="${OPTARG}" ;;
-    c) CHARSET="${OPTARG}" ;;
+  h) HOST="${OPTARG}" ;;
+  P) PORT="${OPTARG}" ;;
+  u) USERNAME="${OPTARG}" ;;
+  p) PASSWORD="${OPTARG}" ;;
+  d) DATABASE="${OPTARG}" ;;
+  v) MYSQL_VERSION="${OPTARG}" ;;
+  c) CHARSET="${OPTARG}" ;;
   esac
 done
 
 if [ -z "$HOST" ]; then
   print_usage
-  exit 2;
+  exit 2
 fi
 
 if [ -z "$USERNAME" ]; then
   print_usage
-  exit 2;
+  exit 2
 fi
 
 if [ -z "$PASSWORD" ]; then
   print_usage
-  exit 2;
+  exit 2
 fi
 
 if [ -z "$DATABASE" ]; then
   print_usage
-  exit 2;
+  exit 2
 fi
 
 docker run --rm --entrypoint=mysqldump mysql:$MYSQL_VERSION \
@@ -63,7 +63,7 @@ docker run --rm --entrypoint=mysqldump mysql:$MYSQL_VERSION \
   --host $HOST \
   --port $PORT \
   --user $USERNAME \
-  -p$PASSWORD > ./$DATABASE.sql
+  -p$PASSWORD >./$DATABASE.sql
 
 docker run --rm --entrypoint=mysqldump mysql:$MYSQL_VERSION \
   --add-drop-table \
@@ -81,4 +81,4 @@ docker run --rm --entrypoint=mysqldump mysql:$MYSQL_VERSION \
   --host $HOST \
   --port $PORT \
   --user $USERNAME \
-  -p$PASSWORD $DATABASE >> ./$DATABASE.sql
+  -p$PASSWORD $DATABASE >>./$DATABASE.sql
