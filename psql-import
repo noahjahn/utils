@@ -21,39 +21,60 @@ print_usage() {
 
 while true; do
     case "$1" in
-        -h | --host ) HOST="$2"; shift 2 ;;
-        -p | --port ) PORT="$2"; shift 2 ;;
-        -u | --username ) USERNAME="$2"; shift 2 ;;
-        -d | --database ) DATABASE="$2"; shift 2 ;;
-        -f | --file ) FILE="$2"; shift 2 ;;
-        -v | --version ) PSQL_VERSION="$2"; shift 2 ;;
-        -- ) shift; break ;;
-        * ) break ;;
+    -h | --host)
+        HOST="$2"
+        shift 2
+        ;;
+    -p | --port)
+        PORT="$2"
+        shift 2
+        ;;
+    -u | --username)
+        USERNAME="$2"
+        shift 2
+        ;;
+    -d | --database)
+        DATABASE="$2"
+        shift 2
+        ;;
+    -f | --file)
+        FILE="$2"
+        shift 2
+        ;;
+    -v | --version)
+        PSQL_VERSION="$2"
+        shift 2
+        ;;
+    --)
+        shift
+        break
+        ;;
+    *) break ;;
     esac
 done
 
 if [ -z "$HOST" ]; then
     print_usage
-    exit 2;
+    exit 2
 fi
 
 if [ -z "$USERNAME" ]; then
     print_usage
-    exit 2;
+    exit 2
 fi
 
 if [ -z "$DATABASE" ]; then
     print_usage
-    exit 2;
+    exit 2
 fi
 
 IMAGE_TAG="noahjahn-utils-psql-import"
 CONTAINER_NAME="$IMAGE_TAG-$(date +%s)"
 
-docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d postgres:$PSQL_VERSION  -f /dev/null
+docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d postgres:$PSQL_VERSION -f /dev/null
 
 docker cp $FILE $CONTAINER_NAME:/$DATABASE.sql
-  
+
 docker exec -it $CONTAINER_NAME pg_restore \
     --dbname $DATABASE \
     --host $HOST \

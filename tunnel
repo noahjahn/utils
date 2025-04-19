@@ -21,45 +21,66 @@ print_usage() {
 
 while true; do
     case "$1" in
-        -u | --bastion-username ) BASTION_USERNAME="$2"; shift 2 ;;
-        -h | --bastion-host ) BASTION_HOST="$2"; shift 2 ;;
-        -k | --bastion-private-key ) BASTION_PRIVATE_KEY_FILE="$2"; shift 2 ;;
-        -p | --local-port ) LOCAL_PORT_MAP="$2"; shift 2 ;;
-        -r | --remote-host ) REMOTE_HOST="$2"; shift 2 ;;
-        -P | --remote-port ) REMOTE_PORT="$2"; shift 2 ;;
-        -- ) shift; break ;;
-        * ) break ;;
+    -u | --bastion-username)
+        BASTION_USERNAME="$2"
+        shift 2
+        ;;
+    -h | --bastion-host)
+        BASTION_HOST="$2"
+        shift 2
+        ;;
+    -k | --bastion-private-key)
+        BASTION_PRIVATE_KEY_FILE="$2"
+        shift 2
+        ;;
+    -p | --local-port)
+        LOCAL_PORT_MAP="$2"
+        shift 2
+        ;;
+    -r | --remote-host)
+        REMOTE_HOST="$2"
+        shift 2
+        ;;
+    -P | --remote-port)
+        REMOTE_PORT="$2"
+        shift 2
+        ;;
+    --)
+        shift
+        break
+        ;;
+    *) break ;;
     esac
 done
 
 if [ -z "$BASTION_USERNAME" ]; then
     print_usage
-    exit 2;
+    exit 2
 fi
 
 if [ -z "$BASTION_HOST" ]; then
     print_usage
-    exit 2;
+    exit 2
 fi
 
 if [ -z "$BASTION_PRIVATE_KEY_FILE" ]; then
     print_usage
-    exit 2;
+    exit 2
 fi
 
 if [ -z "$LOCAL_PORT_MAP" ]; then
     print_usage
-    exit 2;
+    exit 2
 fi
 
 if [ -z "$REMOTE_HOST" ]; then
     print_usage
-    exit 2;
+    exit 2
 fi
 
 if [ -z "$REMOTE_PORT" ]; then
     print_usage
-    exit 2;
+    exit 2
 fi
 
 IMAGE_TAG="noahjahn-utils-tunnel"
@@ -67,11 +88,17 @@ CONTAINER_NAME="$IMAGE_TAG-$(date +%s)"
 
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
-docker build -f "$SCRIPT_DIR/Dockerfile.tunnel" -t $IMAGE_TAG . || exit 1;
+docker build -f "$SCRIPT_DIR/Dockerfile.tunnel" -t $IMAGE_TAG . || exit 1
 
-docker run -p $LOCAL_PORT_MAP:$LOCAL_PORT_MAP --name $CONTAINER_NAME --rm --entrypoint=tail -d $IMAGE_TAG -f /dev/null || exit 1;
+docker run -p $LOCAL_PORT_MAP:$LOCAL_PORT_MAP --name $CONTAINER_NAME --rm --entrypoint=tail -d $IMAGE_TAG -f /dev/null || exit 1
 
-docker cp $BASTION_PRIVATE_KEY_FILE $CONTAINER_NAME:/bastion-private-key || { docker stop -t 1 $CONTAINER_NAME; exit 1; }
-docker exec -i $CONTAINER_NAME chmod 600 /bastion-private-key || { docker stop -t 1 $CONTAINER_NAME; exit 1; }
+docker cp $BASTION_PRIVATE_KEY_FILE $CONTAINER_NAME:/bastion-private-key || {
+    docker stop -t 1 $CONTAINER_NAME
+    exit 1
+}
+docker exec -i $CONTAINER_NAME chmod 600 /bastion-private-key || {
+    docker stop -t 1 $CONTAINER_NAME
+    exit 1
+}
 
 docker exec -it $CONTAINER_NAME ssh -o StrictHostKeyChecking=no -g -N -i /bastion-private-key -L 0.0.0.0:$LOCAL_PORT_MAP:$REMOTE_HOST:$REMOTE_PORT $BASTION_USERNAME@$BASTION_HOST || { docker stop -t 1 $CONTAINER_NAME; }
