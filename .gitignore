@@ -1,3 +1,4 @@
 # Ignore local dir sql files
 backups
 *.sql
+.go
