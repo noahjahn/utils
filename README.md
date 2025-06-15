@@ -58,5 +58,3 @@ Run `utils update`
 ```shell
 utils update
 ```
-
-# sed -i 's/ROW_FORMAT=COMPACT/ROW_FORMAT=DYNAMIC/g' ./$DATABASE.sql
