@@ -1,76 +1,77 @@
 #!/bin/sh
 
-HOST=
-PORT='5432'
-USERNAME=
-DATABASE=
-PSQL_VERSION='latest'
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/base-image-tag.sh"
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/validate-binary.sh"
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/validate-input.sh"
+
+id=$(_validate_binary uuidgen)
+docker=$(_validate_binary docker)
+printf=$(_validate_binary printf)
 
 print_usage() {
-    printf "Usage:\tpsql-export [OPTIONS]\n"
-    printf "\nExport a dump of a PostgreSQL database quickly and efficiently\n\n"
-    printf "Options:\n"
-    printf "  -h, --host string\t\tThe host of the database server you want to export from\n"
-    printf "  -p, --port int\t\tThe port of the database server you want to export from, defaults to 5432\n"
-    printf "  -u, --username string\t\tThe username of the database server that has access to the database that you want to export from\n"
-    printf "  -d, --database string\t\tThe database name on the database server that you want to export from\n"
-    printf "  -v, --version string\t\tThe PostgreSQL database version that you want to use for the pg_dump client, corresponds to the postgres docker image tag, defaults to latest\n"
+    $printf "Usage:\tpsql-export [OPTIONS]\n"
+    $printf "\nExport a dump of a PostgreSQL database quickly and efficiently\n\n"
+    $printf "Options:\n"
+    $printf "  -h, --host string\t\tThe host of the database server you want to export from\n"
+    $printf "  -p, --port int\t\tThe port of the database server you want to export from, defaults to 5432\n"
+    $printf "  -u, --username string\t\tThe username of the database server that has access to the database that you want to export from\n"
+    $printf "  -d, --database string\t\tThe database name on the database server that you want to export from\n"
+    $printf "  -v, --version string\t\tThe PostgreSQL database version that you want to use for the pg_dump client, corresponds to the postgres docker image tag, defaults to latest\n"
+}
+parse_input() {
+    while true; do
+        case "$1" in
+        -h | --host)
+            host="$2"
+            shift 2
+            ;;
+        -p | --port)
+            port="$2"
+            shift 2
+            ;;
+        -u | --username)
+            username="$2"
+            shift 2
+            ;;
+        -d | --database)
+            database="$2"
+            shift 2
+            ;;
+        -v | --version)
+            version="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) break ;;
+        esac
+    done
 }
 
-while true; do
-    case "$1" in
-    -h | --host)
-        HOST="$2"
-        shift 2
-        ;;
-    -p | --port)
-        PORT="$2"
-        shift 2
-        ;;
-    -u | --username)
-        USERNAME="$2"
-        shift 2
-        ;;
-    -d | --database)
-        DATABASE="$2"
-        shift 2
-        ;;
-    -v | --version)
-        PSQL_VERSION="$2"
-        shift 2
-        ;;
-    --)
-        shift
-        break
-        ;;
-    *) break ;;
-    esac
-done
+host=
+port='5432'
+username=
+database=
+file=
+version='latest'
 
-if [ -z "$HOST" ]; then
-    print_usage
-    exit 2
-fi
+parse_input "$@"
 
-if [ -z "$USERNAME" ]; then
-    print_usage
-    exit 2
-fi
+_validate_input "$host" print_usage
+_validate_input "$username" print_usage
+_validate_input "$database" print_usage
 
-if [ -z "$DATABASE" ]; then
-    print_usage
-    exit 2
-fi
+IMAGE_TAG="$BASE_IMAGE_TAG-psql-export"
+CONTAINER_NAME="$IMAGE_TAG-$($id +%s)"
 
-IMAGE_TAG="noahjahn-utils-psql-export"
-CONTAINER_NAME="$IMAGE_TAG-$(date +%s)"
+$docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d postgres:$version -f /dev/null
 
-docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d postgres:$PSQL_VERSION -f /dev/null
-
-PG_DUMP_FLAGS="--file /$DATABASE.sql \
-    --host $HOST \
-    --port $PORT \
-    --user $USERNAME \
+pg_dump_flags="--file /$database.sql \
+    --host $host \
+    --port $port \
+    --user $username \
     --format=c \
     --section=pre-data \
     --section=data \
@@ -83,21 +84,26 @@ PG_DUMP_FLAGS="--file /$DATABASE.sql \
     --no-publications \
     --no-subscriptions \
     --no-security-labels \
-    --no-toast-compression \
     --verbose"
 
-if [ "$(echo "$PSQL_VERSION>=16" | bc -l)" -eq "1" ]; then
-    PG_DUMP_FLAGS="$PG_DUMP_FLAGS \
+if [ "$(echo "$version>=14" | bc -l)" -eq "1" ]; then
+    pg_dump_flags="$pg_dump_flags \
+        --no-toast-compression \
+    "
+fi
+
+if [ "$(echo "$version>=16" | bc -l)" -eq "1" ]; then
+    pg_dump_flags="$pg_dump_flags \
         --large-objects \
         --no-table-access-method \
     "
 fi
 
-docker exec -it $CONTAINER_NAME pg_dump \
-    $PG_DUMP_FLAGS \
-    $DATABASE \
+$docker exec -it $CONTAINER_NAME pg_dump \
+    $pg_dump_flags \
+    $database \
     -W
 
-docker cp $CONTAINER_NAME:/$DATABASE.sql $DATABASE.sql
+$docker cp $CONTAINER_NAME:/$database.sql $database.sql
 
-docker stop -t 1 $CONTAINER_NAME
+$docker stop -t 1 $CONTAINER_NAME

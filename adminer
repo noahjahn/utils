@@ -1,7 +1,18 @@
 #!/bin/bash
 
-PORT=8080
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/base-image-tag.sh"
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/validate-binary.sh"
+
+id=$(_validate_binary uuidgen)
+docker=$(_validate_binary docker)
+printf=$(_validate_binary printf)
+
+port=8080
 if [ -n "$1" ]; then
-    PORT="$1"
+    port="$1"
 fi
-docker run --rm -p ${PORT}:8080 -e ADMINER_DESIGN='nette' adminer
+
+IMAGE_TAG="$BASE_IMAGE_TAG-utils-tunnel"
+CONTAINER_NAME="$IMAGE_TAG-$($id +%s)"
+
+$docker run --name $CONTAINER_NAME --rm -p ${port}:8080 -e ADMINER_DESIGN='nette' adminer

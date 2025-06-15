@@ -1,0 +1,17 @@
+services:
+  source:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: secret
+    restart: unless-stopped
+  target:
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: secret
+    restart: unless-stopped
