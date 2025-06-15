@@ -1,85 +1,86 @@
 #!/bin/sh
 
-HOST=
-PORT='5432'
-USERNAME=
-DATABASE=
-FILE=
-PSQL_VERSION='latest'
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/base-image-tag.sh"
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/validate-binary.sh"
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/validate-input.sh"
+
+id=$(_validate_binary uuidgen)
+docker=$(_validate_binary docker)
+printf=$(_validate_binary printf)
 
 print_usage() {
-    printf "Usage:\tpsql-import [OPTIONS]\n"
-    printf "\nImport a dump of a PostgreSQL database quickly and efficiently\n\n"
-    printf "Options:\n"
-    printf "  -h, --host string\t\tThe host of the database server you want to import to\n"
-    printf "  -p, --port int\t\tThe port of the database server you want to import to, defaults to 5432\n"
-    printf "  -u, --username string\t\tThe username of the database server that has access to the database that you want to import to\n"
-    printf "  -d, --database string\t\tThe database name on the database server that you want to import to\n"
-    printf "  -f, --file string\t\tThe file path to the back-up file that you want to import into the database\n"
-    printf "  -v, --version string\t\tThe PostgreSQL database version that you want to use for the pg_restore client, corresponds to the postgres docker image tag, defaults to latest\n"
+    $printf "Usage:\tpsql-import [OPTIONS]\n"
+    $printf "\nImport a dump of a PostgreSQL database quickly and efficiently\n\n"
+    $printf "Options:\n"
+    $printf "  -h, --host string\t\tThe host of the database server you want to import to\n"
+    $printf "  -p, --port int\t\tThe port of the database server you want to import to, defaults to 5432\n"
+    $printf "  -u, --username string\t\tThe username of the database server that has access to the database that you want to import to\n"
+    $printf "  -d, --database string\t\tThe database name on the database server that you want to import to\n"
+    $printf "  -f, --file string\t\tThe file path to the back-up file that you want to import into the database\n"
+    $printf "  -v, --version string\t\tThe PostgreSQL database version that you want to use for the pg_restore client, corresponds to the postgres docker image tag, defaults to latest\n"
 }
 
-while true; do
-    case "$1" in
-    -h | --host)
-        HOST="$2"
-        shift 2
-        ;;
-    -p | --port)
-        PORT="$2"
-        shift 2
-        ;;
-    -u | --username)
-        USERNAME="$2"
-        shift 2
-        ;;
-    -d | --database)
-        DATABASE="$2"
-        shift 2
-        ;;
-    -f | --file)
-        FILE="$2"
-        shift 2
-        ;;
-    -v | --version)
-        PSQL_VERSION="$2"
-        shift 2
-        ;;
-    --)
-        shift
-        break
-        ;;
-    *) break ;;
-    esac
-done
+parse_input() {
+    while true; do
+        case "$1" in
+        -h | --host)
+            host="$2"
+            shift 2
+            ;;
+        -p | --port)
+            port="$2"
+            shift 2
+            ;;
+        -u | --username)
+            username="$2"
+            shift 2
+            ;;
+        -d | --database)
+            database="$2"
+            shift 2
+            ;;
+        -f | --file)
+            file="$2"
+            shift 2
+            ;;
+        -v | --version)
+            version="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) break ;;
+        esac
+    done
+}
 
-if [ -z "$HOST" ]; then
-    print_usage
-    exit 2
-fi
+host=
+port='5432'
+username=
+database=
+file=
+version='latest'
 
-if [ -z "$USERNAME" ]; then
-    print_usage
-    exit 2
-fi
+parse_input "$@"
 
-if [ -z "$DATABASE" ]; then
-    print_usage
-    exit 2
-fi
+_validate_input "$host" print_usage
+_validate_input "$username" print_usage
+_validate_input "$database" print_usage
 
-IMAGE_TAG="noahjahn-utils-psql-import"
-CONTAINER_NAME="$IMAGE_TAG-$(date +%s)"
+IMAGE_TAG="$BASE_IMAGE_TAG-psql-import"
+CONTAINER_NAME="$IMAGE_TAG-$($id +%s)"
 
-docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d postgres:$PSQL_VERSION -f /dev/null
+$docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d postgres:$version -f /dev/null
 
-docker cp $FILE $CONTAINER_NAME:/$DATABASE.sql
+$docker cp $file $CONTAINER_NAME:/$database.sql
 
-docker exec -it $CONTAINER_NAME pg_restore \
-    --dbname $DATABASE \
-    --host $HOST \
-    --port $PORT \
-    --user $USERNAME \
+$docker exec -it $CONTAINER_NAME pg_restore \
+    --dbname $database \
+    --host $host \
+    --port $port \
+    --user $username \
     --section=pre-data \
     --section=data \
     --section=post-data \
@@ -94,6 +95,6 @@ docker exec -it $CONTAINER_NAME pg_restore \
     --clean \
     --verbose \
     -W \
-    "/$DATABASE.sql"
+    "/$database.sql"
 
-docker stop -t 1 $CONTAINER_NAME
+$docker stop -t 1 $CONTAINER_NAME

@@ -1,0 +1,21 @@
+services:
+  source:
+    image: mysql:latest
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+      MYSQL_USER: employees
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: employees
+    restart: unless-stopped
+  target:
+    image: mysql:latest
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+      MYSQL_USER: employees
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: employees
+    restart: unless-stopped

@@ -1,23 +1,43 @@
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/validate-binary.sh"
+
+git=$(_validate_binary git)
+printf=$(_validate_binary printf)
+
 print_usage() {
-    printf "Usage:\nutils [OPTIONS] [COMMANDS]\n"
-    printf "\nCLI helper for running and using utils\n\n"
-    printf "Commands:\n"
-    printf "  help \t\tDisplay usage and how to use the script\n"
-    printf "  update \tUpdate the utils\n"
+    $printf "Usage:\tutils [OPTIONS] [COMMANDS]\n"
+    $printf "\nCLI helper for running and using utils\n\n"
+    $printf "Commands:\n"
+    $printf "  help \t\tDisplay usage and how to use the script\n"
+    $printf "  update \tUpdate the utils\n"
+    $printf "  verify \tVerify you have all the dependencies needed to use these utils\n"
 }
 
-SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-
 update() {
-    cd $SCRIPT_DIR
-    git pull
-    git submodule update --init --recursive --remote
+    cd "$NOAHJAHN_UTILS_DIR"
+    $git pull
+    $git submodule update --init --recursive --remote
+}
+
+verify() {
+    _validate_binary cd
+    _validate_binary date
+    _validate_binary printf
+    _validate_binary mkdir
+    _validate_binary getopts
+    _validate_binary sed
+    _validate_binary uuidgen
+    _validate_binary git
+    _validate_binary docker
 }
 
 while true; do
     case "$1" in
     update)
         update
+        break
+        ;;
+    verify)
+        verify
         break
         ;;
     help)

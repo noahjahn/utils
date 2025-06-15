@@ -1,84 +1,81 @@
 #!/bin/sh
 
-HOST=
-PORT='3306'
-USERNAME=
-PASSWORD=
-DATABASE=
-MYSQL_VERSION='8'
-CHARSET='utf8'
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/base-image-tag.sh"
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/validate-binary.sh"
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/validate-input.sh"
+
+docker=$(_validate_binary docker)
+printf=$(_validate_binary printf)
 
 print_usage() {
   printf "Usage:\tmysql-export\n\t\t-h <host>\n\t\t-P <port>\n\t\t-u <username>\n\t\t-p <password>\n\t\t-d <database-name>\n\t\t-v <mysql-server-version>\n\t\t-c <mysql-charset>\n\n"
   printf "\t-P\tport is optional, defaults to 3306\n"
   printf "\t-c\tmysql-charset is optional, defaults to utf8\n"
-  printf "\t-v\tmysql-server-version is optional, defaults to 8\n"
+  printf "\t-v\tmysql-server-version is optional, defaults to latest\n"
 }
 
-while getopts 'h:P:u:p:d:v:c:' flag; do
-  case "${flag}" in
-  h) HOST="${OPTARG}" ;;
-  P) PORT="${OPTARG}" ;;
-  u) USERNAME="${OPTARG}" ;;
-  p) PASSWORD="${OPTARG}" ;;
-  d) DATABASE="${OPTARG}" ;;
-  v) MYSQL_VERSION="${OPTARG}" ;;
-  c) CHARSET="${OPTARG}" ;;
-  esac
-done
+parse_input() {
+  while getopts 'h:P:u:p:d:v:c:' flag; do
+    case "${flag}" in
+    h) host="${OPTARG}" ;;
+    P) port="${OPTARG}" ;;
+    u) username="${OPTARG}" ;;
+    p) password="${OPTARG}" ;;
+    d) database="${OPTARG}" ;;
+    v) version="${OPTARG}" ;;
+    c) charset="${OPTARG}" ;;
+    esac
+  done
+}
 
-if [ -z "$HOST" ]; then
-  print_usage
-  exit 2
-fi
+host=
+port='3306'
+username=
+password=
+database=
+file=
+version='latest'
+charset='utf8'
 
-if [ -z "$USERNAME" ]; then
-  print_usage
-  exit 2
-fi
+parse_input "$@"
 
-if [ -z "$PASSWORD" ]; then
-  print_usage
-  exit 2
-fi
+_validate_input "$host" print_usage
+_validate_input "$username" print_usage
+_validate_input "$password" print_usage
+_validate_input "$database" print_usage
 
-if [ -z "$DATABASE" ]; then
-  print_usage
-  exit 2
-fi
-
-docker run --rm --entrypoint=mysqldump mysql:$MYSQL_VERSION \
+$docker run --rm --entrypoint=mysqldump mysql:$version \
   --add-drop-table \
   --comments \
   --create-options \
   --dump-date \
   --no-autocommit \
   --routines \
-  --default-character-set=$CHARSET \
+  --default-character-set=$charset \
   --set-charset \
   --triggers \
   --no-tablespaces \
   --set-gtid-purged=OFF \
-  --no-data $DATABASE \
-  --host $HOST \
-  --port $PORT \
-  --user $USERNAME \
-  -p$PASSWORD >./$DATABASE.sql
+  --no-data $database \
+  --host $host \
+  --port $port \
+  --user $username \
+  -p$password >./$database.sql
 
-docker run --rm --entrypoint=mysqldump mysql:$MYSQL_VERSION \
+$docker run --rm --entrypoint=mysqldump mysql:$version \
   --add-drop-table \
   --comments \
   --create-options \
   --dump-date \
   --no-autocommit \
   --routines \
-  --default-character-set=$CHARSET \
+  --default-character-set=$charset \
   --set-charset \
   --triggers \
   --no-tablespaces \
   --no-create-info \
   --set-gtid-purged=OFF \
-  --host $HOST \
-  --port $PORT \
-  --user $USERNAME \
-  -p$PASSWORD $DATABASE >>./$DATABASE.sql
+  --host $host \
+  --port $port \
+  --user $username \
+  -p$password $database >>./$database.sql
