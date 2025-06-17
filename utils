@@ -1,7 +1,10 @@
+source "$NOAHJAHN_UTILS_DIR/scripts/bash/base-image-tag.sh"
 source "$NOAHJAHN_UTILS_DIR/scripts/bash/validate-binary.sh"
 
 git=$(_validate_binary git)
 printf=$(_validate_binary printf)
+docker=$(_validate_binary docker)
+id=$(_validate_binary uuidgen)
 
 print_usage() {
     $printf "Usage:\tutils [OPTIONS] [COMMANDS]\n"
@@ -16,6 +19,16 @@ update() {
     cd "$NOAHJAHN_UTILS_DIR"
     $git pull
     $git submodule update --init --recursive --remote
+
+    IMAGE_TAG="$BASE_IMAGE_TAG-golang"
+    CONTAINER_NAME="$IMAGE_TAG-$($id +%s)"
+
+    $docker run --name $CONTAINER_NAME --rm --entrypoint=tail -d $IMAGE_TAG -f /dev/null
+
+    mkdir -p /tmp/go
+    $docker cp $CONTAINER_NAME:/usr/local/go /tmp
+    $docker stop -t 1 $CONTAINER_NAME
+    sudo mv /tmp/go /usr/local/go
 }
 
 verify() {

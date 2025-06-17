@@ -1,2 +1,4 @@
 export NOAHJAHN_UTILS_DIR="$HOME/utils"
 PATH="$NOAHJAHN_UTILS_DIR:$NOAHJAHN_UTILS_DIR/.go/bin:$PATH"
+
+export GOROOT="/tmp/go"
