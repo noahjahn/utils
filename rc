@@ -1,4 +1,9 @@
-export NOAHJAHN_UTILS_DIR="$(dirname "$(realpath ${BASH_SOURCE[0]})")"
-if $NOAHJAHN_UTILS_DEBUG; then
+if [[ -n $NOAHJAHN_UTILS_DEBUG ]]; then
     echo "Using utils directory: $NOAHJAHN_UTILS_DIR"
 fi
+
+if [[ -z "${NOAHJAHN_UTILS_DIR}" ]]; then
+    echo "Please set the NOAHJAHN_UTILS_DIR environment variable to the path of your utils directory in your shell configuration file."
+fi
+
+PATH="$PATH:$NOAHJAHN_UTILS_DIR"

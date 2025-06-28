@@ -33,7 +33,8 @@ git clone git@github.com:noahjahn/utils.git ~/utils
 
 ```bash
 if [ -d "$HOME/utils" ] && [ -f "$HOME/utils/rc" ] ; then
-    source "$HOME/utils/rc"
+  export NOAHJAHN_UTILS_DIR="$HOME/utils"
+  source "$HOME/utils/rc"
 fi
 ```
 
