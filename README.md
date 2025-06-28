@@ -1,6 +1,6 @@
 # Utils
 
-Utilities I use on a daily basis, Dockerized.
+Utilities I use on a daily basis, Dockerized where necessary.
 
 ## Requirements
 
@@ -32,7 +32,7 @@ git clone git@github.com:noahjahn/utils.git ~/utils
 - be sure to change the file path if you didn't clone this repo to your home directory
 
 ```bash
-if [ -d "$HOME/utils" ] && [ -f "$HOME/utils/rc"] ; then
+if [ -d "$HOME/utils" ] && [ -f "$HOME/utils/rc" ] ; then
     source "$HOME/utils/rc"
 fi
 ```

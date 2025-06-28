@@ -23,6 +23,9 @@ verify() {
     _validate_binary date
     _validate_binary printf
     _validate_binary mkdir
+    _validate_binary dirname
+    _validate_binary realpath
+    _validate_binary echo
     _validate_binary getopts
     _validate_binary sed
     _validate_binary uuidgen
