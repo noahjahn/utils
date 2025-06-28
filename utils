@@ -1,3 +1,5 @@
+#!/bin/sh
+
 source "$NOAHJAHN_UTILS_DIR/scripts/bash/validate-binary.sh"
 
 git=$(_validate_binary git)
