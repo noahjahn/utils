@@ -16,6 +16,7 @@ print_usage() {
 
 update() {
     cd "$NOAHJAHN_UTILS_DIR"
+    $git fetch
     $git pull
     $git submodule update --init --recursive --remote
 }
