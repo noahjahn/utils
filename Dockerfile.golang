@@ -1,9 +1,0 @@
-FROM golang:latest
-
-RUN useradd go --create-home --user-group --shell /bin/bash
-
-USER go
-
-RUN mkdir -p /home/go/.cache
-
-WORKDIR /home/go

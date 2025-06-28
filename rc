@@ -2,4 +2,3 @@ export NOAHJAHN_UTILS_DIR="$(dirname "$(realpath ${BASH_SOURCE[0]})")"
 if $NOAHJAHN_UTILS_DEBUG; then
     echo "Using utils directory: $NOAHJAHN_UTILS_DIR"
 fi
-PATH="$NOAHJAHN_UTILS_DIR:$NOAHJAHN_UTILS_DIR/.go/bin:$PATH"
