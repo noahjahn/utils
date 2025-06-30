@@ -1,14 +1,16 @@
 FROM golang:latest
 
 ARG USERNAME=go
+ARG HOME=/home/go
 
-RUN useradd ${USERNAME} --create-home --user-group --shell /bin/bash
+RUN useradd ${USERNAME} --home-dir ${HOME} --create-home --user-group --shell /bin/bash
 
 USER ${USERNAME}
 
-ENV GOPATH=/home/${USERNAME}/utils/.go
+ENV GOPATH=${HOME}/utils/.go
 ENV PATH=$GOPATH/bin:$PATH
+ENV GOOS=darwin
 
-RUN mkdir -p /home/${USERNAME}/.cache /home/${USERNAME}/utils/.go
+RUN mkdir -p ${HOME}/.cache ${HOME}/utils/.go
 
-WORKDIR /home/${USERNAME}
+WORKDIR ${HOME}

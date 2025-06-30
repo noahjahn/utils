@@ -43,13 +43,15 @@ done
 command="${command%" "}"
 
 IMAGE_TAG="$BASE_IMAGE_TAG-golang"
-CONTAINER_NAME="$IMAGE_TAG-$($id +%s)"
+CONTAINER_NAME="$IMAGE_TAG-$($id)"
 
-$docker build --build-arg USERNAME=$(whoami) --pull --quiet -f "$NOAHJAHN_UTILS_DIR/Dockerfile.golang" -t $IMAGE_TAG . >/dev/null || exit 1
+$docker buildx build --platform linux/$(uname -m) --build-arg USERNAME=$(whoami) --build-arg HOME=$HOME --pull --quiet -f "$NOAHJAHN_UTILS_DIR/Dockerfile.golang" -t $IMAGE_TAG . >/dev/null || exit 1
 
 mkdir -p "$NOAHJAHN_UTILS_DIR/.go/bin"
 
-run="$docker run --name $CONTAINER_NAME --rm --init -t --entrypoint=$entrypoint \
+run="$docker run --name $CONTAINER_NAME --rm --init -t \
+    --platform linux/$(uname -m) \
+    --entrypoint=$entrypoint \
     -v $NOAHJAHN_UTILS_DIR/.go:/home/$(whoami)/go \
     -v $HOME/.cache:/home/$(whoami)/.cache \
     -v $(pwd):$(pwd) \
